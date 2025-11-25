@@ -1,0 +1,70 @@
+services:
+  app:
+    container_name: celery-example-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./src
+          target: /app/src
+    ports:
+      - "8080:8080"
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+  worker:
+    container_name: celery-worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./src
+          target: /app/src
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  rabbit-mq:
+    container_name: rabbitmq
+    build:
+      dockerfile_inline: |
+        FROM rabbitmq:3
+        RUN echo "log.console = true" > /etc/rabbitmq/rabbitmq.conf && \
+          echo "log.console.level = warning" >> /etc/rabbitmq/rabbitmq.conf
+
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    container_name: redis
+    image: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    command: redis-server --loglevel warning
+    ports:
+      - "6379:6379"

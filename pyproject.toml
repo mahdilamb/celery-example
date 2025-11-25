@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=65.5.1","wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "celery-example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "celery>=5.5.3",
+    "redis>=7.1.0",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = [
+    "celery-types>=0.23.0",
+    "pytest>=9.0.1",
+]
+
+
+[tool.pytest.ini_options]
+# Directories to search for tests
+testpaths = ["tests"]
+
+# Patterns to identify test files
+python_files = ["test_*.py", "*_test.py"]
