@@ -18,7 +18,7 @@ def __is_rabbit_mq_running(host: str, port: int):
         return False
 
 
-if __is_rabbit_mq_running("localhost", port=5672):
+if os.getenv("ENV") == "TESTING" or __is_rabbit_mq_running("localhost", port=5672):
     logging.info("Running with rabbit-mq as broker; redis as backend.")
     app = Celery(__name__, broker=RABBIT_MQ_ADDR, backend=REDIS_ADDR)
 else:
